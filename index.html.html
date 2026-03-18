@@ -1,0 +1,692 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CFA Level 1 — Study Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:#f5f4f0;font-family:'DM Sans',sans-serif;font-size:15px;color:#1a1a2e;}
+button{cursor:pointer;font-family:'DM Sans',sans-serif;}
+button:hover{opacity:.85;}
+input,textarea,select{font-family:'DM Sans',sans-serif;font-size:14px;}
+::-webkit-scrollbar{width:6px;}
+::-webkit-scrollbar-track{background:#f0ede6;}
+::-webkit-scrollbar-thumb{background:#c8b88a;border-radius:3px;}
+
+/* TOP BAR */
+#topbar{background:linear-gradient(135deg,#1a1a2e,#2d3561);padding:20px 28px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12;}
+#topbar-left .label{font-family:'DM Mono',monospace;font-size:12px;color:rgba(255,255,255,.5);letter-spacing:2px;text-transform:uppercase;margin-bottom:4px;}
+#topbar-left .title{font-family:'Bebas Neue',sans-serif;font-size:30px;color:#c8a84b;letter-spacing:2px;}
+#countdown{text-align:center;}
+#countdown .days{font-family:'Bebas Neue',sans-serif;font-size:90px;color:#c84b4b;line-height:1;}
+#countdown .label{font-family:'DM Mono',monospace;font-size:14px;color:rgba(255,255,255,.7);letter-spacing:2px;margin-top:4px;}
+
+/* TIMER BAR */
+#timerbar{background:#1a1a2e;padding:12px 28px;display:flex;align-items:center;gap:16;flex-wrap:wrap;border-bottom:2px solid #2d3561;gap:14px;}
+#app-switcher{display:flex;background:rgba(255,255,255,.1);border-radius:8px;padding:3px;}
+#app-switcher button{padding:8px 20px;border-radius:6px;border:none;font-family:'DM Mono',monospace;font-size:14px;letter-spacing:1px;background:transparent;color:rgba(255,255,255,.6);}
+#app-switcher button.active{background:#c8a84b;color:#1a1a2e;font-weight:bold;}
+#timer-display{font-family:'DM Mono',monospace;font-size:34px;color:#ffffff;font-weight:bold;letter-spacing:3px;min-width:130px;}
+#timer-display.running{color:#f0c040;}
+.timer-btn{font-family:'DM Mono',monospace;font-size:15px;padding:8px 22px;border-radius:8px;border:none;font-weight:bold;}
+#btn-start{background:#c8a84b;color:#1a1a2e;}
+#btn-pause{background:transparent;border:2px solid #c8a84b !important;color:#c8a84b;}
+#btn-reset{background:transparent;border:2px solid rgba(255,255,255,.2) !important;color:rgba(255,255,255,.5);font-size:18px;padding:6px 14px;}
+#daily-total{font-family:'DM Mono',monospace;font-size:13px;color:rgba(255,255,255,.5);}
+#daily-total span{color:#f0c040;font-weight:bold;}
+
+/* SCORE BARS */
+#scorebars{background:#ece9e1;border-bottom:1px solid #e0dbd0;padding:14px 28px;}
+#scorebars .label{font-family:'DM Mono',monospace;font-size:12px;color:#6b7280;letter-spacing:2px;text-transform:uppercase;margin-bottom:10px;}
+#score-grid{display:flex;gap:8px;flex-wrap:wrap;}
+.score-item{flex:1 1 140px;min-width:120px;}
+.score-header{display:flex;justify-content:space-between;margin-bottom:4px;}
+.score-topic{font-family:'DM Mono',monospace;font-size:12px;color:#1a1a2e;}
+.score-pct{font-family:'DM Mono',monospace;font-size:12px;font-weight:bold;}
+.score-bar-bg{height:5px;background:#d8d3c8;border-radius:3px;}
+.score-bar-fill{height:100%;border-radius:3px;transition:width .4s;}
+
+/* TABS */
+#tabs{display:flex;border-bottom:1px solid #e0dbd0;background:#fff;overflow-x:auto;}
+.tab{padding:14px 22px;font-family:'DM Mono',monospace;font-size:13px;letter-spacing:1px;cursor:pointer;white-space:nowrap;border-bottom:2px solid transparent;color:#6b7280;background:transparent;border-top:none;border-left:none;border-right:none;}
+.tab.active{border-bottom:2px solid #b8860b;color:#b8860b;font-weight:bold;background:rgba(184,134,11,.06);}
+
+/* PANELS */
+.panel{display:none;padding:22px 28px;}
+.panel.active{display:block;}
+
+/* ERROR LOG */
+#error-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:10px;}
+#error-header .title{font-family:'DM Mono',monospace;font-size:15px;color:#b8860b;letter-spacing:2px;}
+#error-header .sub{font-size:13px;color:#6b7280;margin-top:3px;}
+.action-btn{font-family:'DM Mono',monospace;font-size:12px;padding:8px 14px;border-radius:6px;border:1px solid #e0dbd0;background:transparent;color:#6b7280;}
+.action-btn.gold{border-color:#b8860b;color:#b8860b;background:rgba(184,134,11,.1);}
+.action-btn.green{border-color:#2d8a4e;color:#2d8a4e;background:rgba(34,139,34,.1);}
+
+#filter-bar{margin-bottom:16px;padding:12px 14px;background:#fff;border-radius:8px;border:1px solid #e0dbd0;}
+#filter-bar .flabel{font-family:'DM Mono',monospace;font-size:11px;color:#6b7280;letter-spacing:1px;text-transform:uppercase;margin-bottom:8px;}
+#filter-buttons{display:flex;gap:6px;flex-wrap:wrap;}
+.filter-btn{font-family:'DM Mono',monospace;font-size:11px;padding:5px 12px;border-radius:20px;border:1px solid #e0dbd0;background:white;color:#6b7280;cursor:pointer;}
+.filter-btn.active{border-color:#b8860b;background:rgba(184,134,11,.18);color:#b8860b;font-weight:bold;}
+
+#error-form{background:#fff;border:1px solid #b8860b;border-radius:10px;padding:18px;margin-bottom:16px;display:none;}
+#error-form .form-title{font-family:'DM Mono',monospace;font-size:13px;color:#b8860b;letter-spacing:2px;margin-bottom:14px;}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;}
+.form-field label{display:block;font-family:'DM Mono',monospace;font-size:11px;color:#6b7280;letter-spacing:1px;margin-bottom:5px;}
+.form-field label.red{color:#c84b4b;}
+.form-field label.green{color:#2d8a4e;}
+.form-field select,.form-field input,.form-field textarea{width:100%;background:#f5f4f0;border:1px solid #e0dbd0;border-radius:6px;padding:10px 12px;color:#1a1a2e;font-size:14px;outline:none;resize:vertical;}
+.form-field select.highlight{border-color:#f0a0a0;}
+.form-actions{display:flex;gap:8px;margin-top:4px;}
+.save-btn{font-family:'DM Mono',monospace;font-size:13px;padding:8px 18px;border-radius:6px;border:none;background:#b8860b;color:#fff;font-weight:bold;}
+.cancel-btn{font-family:'DM Mono',monospace;font-size:13px;padding:8px 18px;border-radius:6px;border:1px solid #e0dbd0;color:#6b7280;background:transparent;}
+
+#error-list{}
+.error-card{background:#fff;border:1px solid #e0dbd0;border-radius:10px;margin-bottom:12px;overflow:hidden;}
+.error-card-header{padding:10px 16px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #e0dbd0;background:#f5f4f0;}
+.error-badges{display:flex;gap:6px;flex-wrap:wrap;align-items:center;}
+.badge-topic{font-family:'DM Mono',monospace;font-size:11px;padding:3px 10px;border-radius:20px;background:rgba(184,134,11,.15);color:#b8860b;border:1px solid rgba(184,134,11,.3);font-weight:bold;}
+.badge-kw{font-family:'DM Mono',monospace;font-size:11px;padding:3px 10px;border-radius:20px;background:rgba(200,75,75,.1);color:#c84b4b;border:1px solid rgba(200,75,75,.25);}
+.card-actions button{background:none;border:none;color:#6b7280;cursor:pointer;font-size:13px;padding:3px 8px;}
+.error-question{padding:12px 16px;font-size:14px;color:#1a1a2e;line-height:1.6;border-bottom:1px solid #e0dbd0;}
+.error-question .qlabel{font-family:'DM Mono',monospace;font-size:11px;color:#6b7280;letter-spacing:1px;margin-bottom:6px;}
+.error-hint{padding:12px 16px;}
+.hint-box{font-size:14px;color:#2d5a3d;line-height:1.6;padding:10px 14px;background:rgba(34,139,34,.06);border-radius:6px;border-left:3px solid #2d8a4e;}
+.reveal-btn{font-family:'DM Mono',monospace;font-size:12px;padding:6px 14px;border-radius:6px;border:1px solid #e0dbd0;background:transparent;color:#6b7280;margin-bottom:8px;}
+.reveal-btn.shown{border-color:#2d8a4e;color:#2d8a4e;background:rgba(34,139,34,.08);}
+#empty-state{text-align:center;padding:60px 20px;color:#6b7280;font-family:'DM Mono',monospace;font-size:14px;}
+
+/* PHASE PANELS */
+.phase-header{margin-bottom:20px;padding:14px 18px;border-left:3px solid #b8860b;background:#fff;border-radius:0 8px 8px 0;}
+.phase-header .ph-name{font-family:'Bebas Neue',sans-serif;font-size:22px;color:#b8860b;letter-spacing:1px;}
+.phase-header .ph-desc{font-size:14px;color:#6b7280;margin-top:3px;}
+.week-label{font-family:'DM Mono',monospace;font-size:13px;letter-spacing:2px;color:#6b7280;text-transform:uppercase;margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid #e0dbd0;}
+.week-block{margin-bottom:28px;}
+.day-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px;}
+.day-card{background:#fff;border:1px solid #e0dbd0;border-radius:8px;padding:14px 16px;cursor:pointer;transition:all .2s;border-left:3px solid #b8860b;}
+.day-card:hover{box-shadow:0 2px 8px rgba(0,0,0,.08);}
+.day-card.done{background:rgba(34,139,34,.05);border-color:#4bc87a;border-left-color:#4bc87a;}
+.day-card.rest{border-left-color:#6b7280;}
+.day-card.mock{border-left-color:#4b7ec8;}
+.day-card.today-card{border:2px solid #c84b4b;border-left:4px solid #c84b4b;box-shadow:0 0 0 3px rgba(200,75,75,.15);}
+.today-badge{font-family:'DM Mono',monospace;font-size:10px;padding:2px 8px;border-radius:20px;background:#c84b4b;color:#fff;font-weight:bold;letter-spacing:1px;}
+.day-card-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;}
+.day-tag{font-family:'DM Mono',monospace;font-size:11px;padding:2px 8px;border-radius:4px;background:rgba(184,134,11,.12);color:#b8860b;}
+.day-check{width:20px;height:20px;border-radius:5px;border:2px solid #e0dbd0;background:transparent;display:flex;align-items:center;justify-content:center;font-size:12px;color:#fff;font-weight:bold;flex-shrink:0;}
+.day-card.done .day-check{background:#4bc87a;border-color:#4bc87a;}
+.day-title{font-size:14px;font-weight:600;color:#1a1a2e;margin-bottom:6px;line-height:1.4;}
+.day-card.done .day-title{color:#6b7280;text-decoration:line-through;}
+.day-desc{font-size:13px;color:#6b7280;line-height:1.5;}
+
+/* FRENCH PANEL */
+#fr-panel{padding:24px 28px;max-width:860px;margin:0 auto;display:none;}
+#fr-panel.active{display:block;}
+.fr-stats{display:flex;gap:10px;margin-bottom:20px;flex-wrap:wrap;}
+.fr-stat{background:#fff;border:1px solid #e0dbd0;border-radius:8px;padding:12px 16px;flex:1;min-width:90px;}
+.fr-stat .sn{font-family:'DM Mono',monospace;font-size:20px;line-height:1;margin-bottom:3px;}
+.fr-stat .sl{font-family:'DM Mono',monospace;font-size:11px;color:#6b7280;letter-spacing:1px;text-transform:uppercase;}
+.fr-progress{background:#fff;border:1px solid #e0dbd0;border-radius:8px;padding:12px 16px;margin-bottom:14px;}
+.fr-progress-top{display:flex;justify-content:space-between;margin-bottom:8px;}
+.fr-bar-bg{height:5px;background:#e0dbd0;border-radius:3px;overflow:hidden;}
+.fr-bar-fill{height:100%;background:linear-gradient(to right,#002395,#ED2939);border-radius:3px;transition:width .4s;}
+.fr-task{background:#fff;border:1px solid #e0dbd0;border-left:3px solid #e0dbd0;border-radius:8px;padding:14px 16px;margin-bottom:10px;display:flex;gap:12px;cursor:pointer;transition:all .2s;}
+.fr-task.done{background:rgba(34,139,34,.05);border-color:#4bc87a;border-left-color:#4bc87a;}
+.fr-check{width:22px;height:22px;border-radius:5px;border:2px solid #e0dbd0;background:transparent;flex-shrink:0;margin-top:2px;display:flex;align-items:center;justify-content:center;font-size:13px;color:#fff;font-weight:bold;}
+.fr-task.done .fr-check{background:#4bc87a;border-color:#4bc87a;}
+.fr-time{font-family:'DM Mono',monospace;font-size:12px;color:#c84b4b;letter-spacing:1px;margin-bottom:3px;}
+.fr-ttitle{font-size:15px;font-weight:600;color:#1a1a2e;margin-bottom:3px;}
+.fr-task.done .fr-ttitle{color:#6b7280;text-decoration:line-through;}
+.fr-tdesc{font-size:13px;color:#6b7280;line-height:1.5;}
+.fr-tag{display:inline-block;margin-top:6px;font-family:'DM Mono',monospace;font-size:11px;padding:2px 8px;border-radius:4px;background:rgba(184,134,11,.1);color:#b8860b;}
+.fr-quote{margin-top:20px;padding:14px 18px;background:rgba(0,35,149,.05);border:1px solid rgba(0,35,149,.15);border-radius:8px;font-style:italic;font-size:14px;color:#7090c0;text-align:center;line-height:1.7;}
+</style>
+</head>
+<body>
+
+<!-- TOP BAR -->
+<div id="topbar">
+  <div id="topbar-left">
+    <div class="label">CFA Level I</div>
+    <div class="title">Study Dashboard</div>
+  </div>
+  <div id="countdown">
+    <div class="days" id="days-left">--</div>
+    <div class="label">DAYS TO MAY 1 EXAM</div>
+  </div>
+</div>
+
+<!-- TIMER BAR -->
+<div id="timerbar">
+  <div id="app-switcher">
+    <button onclick="switchApp('cfa')" id="btn-app-cfa" class="active">📈 CFA</button>
+    <button onclick="switchApp('fr')" id="btn-app-fr">🇫🇷 法语</button>
+  </div>
+  <div id="timer-display">00:00:00</div>
+  <button class="timer-btn" id="btn-start" onclick="startTimer()">▶ 开始</button>
+  <button class="timer-btn" id="btn-pause" onclick="pauseTimer()" style="display:none;">⏸ 暂停</button>
+  <button class="timer-btn" id="btn-reset" onclick="resetTimer()">↺</button>
+  <div id="daily-total">今日累计 <span id="total-min">0</span> 分钟</div>
+</div>
+
+<!-- CFA SECTION -->
+<div id="cfa-section">
+
+  <!-- SCORE BARS -->
+  <div id="scorebars">
+    <div class="label">📊 上次考试成绩 — 重点攻克</div>
+    <div id="score-grid"></div>
+  </div>
+
+  <!-- TABS -->
+  <div id="tabs">
+    <button class="tab active" onclick="switchTab(0)">📓 Error Log</button>
+    <button class="tab" onclick="switchTab(1)">Phase 1 · Foundation</button>
+    <button class="tab" onclick="switchTab(2)">Phase 2 · Deep Dive</button>
+    <button class="tab" onclick="switchTab(3)">Phase 3 · Mock & Final</button>
+  </div>
+
+  <!-- ERROR LOG PANEL -->
+  <div class="panel active" id="panel-0">
+    <div id="error-header">
+      <div>
+        <div class="title">📓 ERROR LOG</div>
+        <div class="sub">陷阱词 · 正确逻辑 · 同类题规律 — 考前只看这里</div>
+      </div>
+      <div style="display:flex;gap:8px;">
+        <button class="action-btn" id="review-btn" onclick="toggleReview()">Review Mode</button>
+        <button class="action-btn gold" onclick="toggleForm()">+ Add Error</button>
+      </div>
+    </div>
+
+    <div id="filter-bar">
+      <div class="flabel">Filter by Topic</div>
+      <div id="filter-buttons"></div>
+    </div>
+
+    <div id="error-form">
+      <div class="form-title" id="form-title">NEW ERROR</div>
+      <div class="form-row">
+        <div class="form-field">
+          <label>TOPIC *</label>
+          <select id="f-topic">
+            <option value="">Select topic...</option>
+          </select>
+        </div>
+        <div class="form-field">
+          <label class="red">⚠️ TRAP / KEY WORDS</label>
+          <input id="f-keywords" placeholder="e.g. over time, least likely">
+        </div>
+      </div>
+      <div class="form-field" style="margin-bottom:12px;">
+        <label>QUESTION / SCENARIO *</label>
+        <textarea id="f-question" rows="3" placeholder="Summarize the question here..."></textarea>
+      </div>
+      <div class="form-field" style="margin-bottom:14px;">
+        <label class="green">✓ HINT / CORRECT LOGIC</label>
+        <textarea id="f-hint" rows="2" placeholder="Why is the correct answer correct?"></textarea>
+      </div>
+      <div class="form-actions">
+        <button class="save-btn" onclick="saveError()" id="save-btn">SAVE</button>
+        <button class="cancel-btn" onclick="closeForm()">Cancel</button>
+      </div>
+    </div>
+
+    <div id="empty-state">No errors yet. Click "+ Add Error" to start.</div>
+    <div id="error-list"></div>
+  </div>
+
+  <!-- PHASE PANELS -->
+  <div class="panel" id="panel-1"></div>
+  <div class="panel" id="panel-2"></div>
+  <div class="panel" id="panel-3"></div>
+
+</div>
+
+<!-- FRENCH SECTION -->
+<div id="fr-panel">
+  <div class="fr-stats">
+    <div class="fr-stat"><div class="sn" style="color:#4b8ec8;">A1</div><div class="sl">当前水平</div></div>
+    <div class="fr-stat"><div class="sn" style="color:#b8860b;">Phase 1</div><div class="sl">唤醒期 Mar–Apr</div></div>
+    <div class="fr-stat"><div class="sn" style="color:#4bc87a;">June</div><div class="sl">目标完成</div></div>
+  </div>
+  <div class="fr-progress">
+    <div class="fr-progress-top"><span style="font-size:14px;color:#6b7280;">今日完成度</span><span id="fr-count" style="font-family:'DM Mono',monospace;font-size:18px;">0 / 3</span></div>
+    <div class="fr-bar-bg"><div class="fr-bar-fill" id="fr-bar" style="width:0%;"></div></div>
+  </div>
+  <div id="fr-tasks"></div>
+  <div class="fr-quote">« La langue est la feuille de route d'une culture. »<br><span style="font-size:12px;color:#6b7280;">Chaque jour compte.</span></div>
+</div>
+
+<script>
+// ── DATA ──
+const TOPICS=["Ethics","Quant","Economics","FSA","Corp. Issuers","Equity","Fixed Income","Derivatives","Alternatives","Portfolio"];
+const SCORES=[
+  {t:"Derivatives",p:43,c:"#c84b4b"},{t:"Equity",p:47,c:"#c84b4b"},
+  {t:"Fixed Income",p:48,c:"#c87a4b"},{t:"Corp Issuers",p:55,c:"#c8a84b"},
+  {t:"Portfolio",p:60,c:"#c8a84b"},{t:"Alternatives",p:62,c:"#c8a84b"},
+  {t:"Quant",p:63,c:"#a8b84b"},{t:"FSA",p:63,c:"#a8b84b"},
+  {t:"Ethics",p:71,c:"#4bc87a"},{t:"Economics",p:74,c:"#4bc87a"},
+];
+const FR_TASKS=[
+  {id:"f1",time:"早读 7:00am",title:"朗读法语课文 15分钟",desc:"大声朗读，注意发音和连读",tag:"口语"},
+  {id:"f2",time:"Anki 随时",title:"Anki单词复习",desc:"每日新词10个 + 复习旧词",tag:"词汇"},
+  {id:"f3",time:"晚读 9:00pm",title:"听法语播客/看法语视频",desc:"沉浸式输入，不强求全懂",tag:"听力"},
+];
+const PHASES=[
+  {name:"Phase 1: Foundation",desc:"Days 1–28 · Build base across ALL topics",weeks:[
+    {lbl:"Week 1 · Ethics + Quant",days:[
+      {t:"Ethics: Code & Standards I–III",d:"Professionalism, Integrity of Capital Markets, Duties to Clients",tag:"ETHICS"},
+      {t:"Ethics: Code & Standards IV–VII",d:"Duties to Employers, Investment Analysis, Conflicts of Interest",tag:"ETHICS"},
+      {t:"Quant: Time Value of Money",d:"PV, FV, annuities, perpetuities. BA II Plus drills.",tag:"QUANT"},
+      {t:"Quant: Statistics I",d:"Mean, median, variance, standard deviation, distributions",tag:"QUANT"},
+      {t:"Quant: Statistics II",d:"Skewness, kurtosis, correlation, regression basics",tag:"QUANT"},
+      {t:"Quant: Probability",d:"Bayes theorem, counting, expected value",tag:"QUANT"},
+      {t:"Rest + Review Week 1",d:"Review error log, redo weak questions",tag:"REST"},
+    ]},
+    {lbl:"Week 2 · Economics",days:[
+      {t:"Econ: Demand & Supply",d:"Elasticity, consumer/producer surplus, price controls",tag:"ECON"},
+      {t:"Econ: Firms & Market Structures",d:"Perfect competition, monopoly, oligopoly, monopolistic competition",tag:"ECON"},
+      {t:"Econ: GDP & Business Cycles",d:"Leading/lagging indicators, phases of cycle",tag:"ECON"},
+      {t:"Econ: Fiscal & Monetary Policy",d:"AD/AS model, crowding out, Ricardian equivalence",tag:"ECON"},
+      {t:"Econ: International Trade",d:"Trade balance, exchange rates, parity conditions",tag:"ECON"},
+      {t:"FSA: Financial Reporting Intro",d:"IFRS vs GAAP, financial statements overview",tag:"FSA"},
+      {t:"Rest + Review Week 2",d:"Review error log",tag:"REST"},
+    ]},
+    {lbl:"Week 3 · FSA",days:[
+      {t:"FSA: Income Statement",d:"Revenue recognition, EPS, non-recurring items",tag:"FSA"},
+      {t:"FSA: Balance Sheet",d:"Assets, liabilities, equity, working capital",tag:"FSA"},
+      {t:"FSA: Cash Flow Statement",d:"Direct vs indirect, FCF, quality of earnings",tag:"FSA"},
+      {t:"FSA: Financial Analysis",d:"Ratios: liquidity, solvency, profitability, activity",tag:"FSA"},
+      {t:"FSA: Inventories & Long-term Assets",d:"FIFO/LIFO/WAC, depreciation methods",tag:"FSA"},
+      {t:"FSA: Taxes & Long-term Liabilities",d:"Deferred tax, lease accounting",tag:"FSA"},
+      {t:"Rest + Review Week 3",d:"Review error log",tag:"REST"},
+    ]},
+    {lbl:"Week 4 · Corp Issuers + Equity",days:[
+      {t:"Corp: Capital Structure",d:"Modigliani-Miller, WACC, optimal leverage",tag:"CORP"},
+      {t:"Corp: Dividends & Buybacks",d:"Dividend policy, share repurchases",tag:"CORP"},
+      {t:"Equity: Market Organization",d:"Types of markets, orders, short selling",tag:"EQUITY"},
+      {t:"Equity: Security Valuation",d:"DDM, FCFE, P/E, P/B multiples",tag:"EQUITY"},
+      {t:"Equity: Industry Analysis",d:"Porter's five forces, competitive analysis",tag:"EQUITY"},
+      {t:"Mixed Review Day",d:"Ethics + Quant + Econ weak areas",tag:"REVIEW"},
+      {t:"Rest + Review Week 4",d:"Review error log",tag:"REST"},
+    ]},
+  ]},
+  {name:"Phase 2: Deep Dive",desc:"Days 29–48 · Fixed Income, Derivatives, Alternatives",weeks:[
+    {lbl:"Week 5 · Fixed Income I",days:[
+      {t:"FI: Bond Features",d:"Bond terms, indenture, sinking funds, embedded options",tag:"FI"},
+      {t:"FI: Yield Measures",d:"YTM, YTC, BEY, G-spread, I-spread, Z-spread, OAS",tag:"FI"},
+      {t:"FI: Duration & Convexity",d:"Macaulay, modified, effective duration",tag:"FI"},
+      {t:"FI: Credit Analysis",d:"Credit risk, ratings, credit spreads",tag:"FI"},
+      {t:"FI: Asset-Backed Securities",d:"MBS, ABS, CDO, prepayment risk",tag:"FI"},
+      {t:"FI: Term Structure",d:"Yield curve shapes, spot rates, forward rates",tag:"FI"},
+      {t:"Timed FI Drill",d:"This is your weak area — push hard here",tag:"FI"},
+    ]},
+    {lbl:"Week 6 · Derivatives",days:[
+      {t:"Derivatives: Forwards & Futures",d:"Pricing, settlement, basis risk, cost of carry",tag:"DERIV"},
+      {t:"Derivatives: Swaps",d:"Interest rate swaps, currency swaps, equity swaps",tag:"DERIV"},
+      {t:"Derivatives: Options I",d:"Calls/puts, intrinsic vs time value, moneyness",tag:"DERIV"},
+      {t:"Derivatives: Options II",d:"Greeks, put-call parity, binomial model",tag:"DERIV"},
+      {t:"Alternatives: Real Assets",d:"Real estate, infrastructure, commodities",tag:"ALT"},
+      {t:"Alternatives: Hedge Funds & PE",d:"Strategies, fee structures, due diligence",tag:"ALT"},
+      {t:"Rest + Derivatives Review",d:"43% last time — go deep",tag:"REST"},
+    ]},
+    {lbl:"Week 7 · Portfolio Management",days:[
+      {t:"Portfolio: Risk & Return",d:"Markowitz, efficient frontier, CAL, CML",tag:"PORT"},
+      {t:"Portfolio: CAPM",d:"Beta, SML, alpha, systematic vs unsystematic risk",tag:"PORT"},
+      {t:"Portfolio: Investment Policy",d:"IPS, return/risk objectives, constraints",tag:"PORT"},
+      {t:"Mixed Mock: Equity + Corp",d:"50 questions timed",tag:"MOCK"},
+      {t:"Mixed Mock: FSA + Quant",d:"50 questions timed",tag:"MOCK"},
+      {t:"Mixed Mock: FI + Derivatives",d:"50 questions timed",tag:"MOCK"},
+      {t:"Rest + Phase 2 Review",d:"Update error log with all new mistakes",tag:"REST"},
+    ]},
+  ]},
+  {name:"Phase 3: Mock & Final",desc:"Days 49–60 · Full mocks + targeted review",weeks:[
+    {lbl:"Week 8–9 · Full Mocks",days:[
+      {t:"Full Mock Exam #1 AM",d:"90 questions, strict timing, no breaks",tag:"MOCK"},
+      {t:"Full Mock Exam #1 PM + Review",d:"Review ALL wrong answers, add to error log",tag:"MOCK"},
+      {t:"Targeted Review: Weak Topics",d:"Based on mock #1 results",tag:"REVIEW"},
+      {t:"Full Mock Exam #2",d:"Full 180 questions, simulate exam day",tag:"MOCK"},
+      {t:"Mock #2 Review",d:"Focus on topics below 70%",tag:"MOCK"},
+      {t:"Error Log Sprint",d:"Go through every error log entry",tag:"REVIEW"},
+      {t:"Full Mock Exam #3",d:"Last full mock before exam",tag:"MOCK"},
+    ]},
+    {lbl:"Week 10 · Final Sprint",days:[
+      {t:"Mock #3 Review",d:"Identify final weak spots",tag:"MOCK"},
+      {t:"Ethics Final Review",d:"Re-read Standards, do 40 ethics questions",tag:"ETHICS"},
+      {t:"Formula Sheet Review",d:"All key formulas — duration, CAPM, DDM",tag:"REVIEW"},
+      {t:"Light Review + Rest",d:"No new material. Rest. Sleep early.",tag:"REST"},
+      {t:"🎯 EXAM DAY — MAY 1",d:"You've done the work. Trust your prep.",tag:"EXAM"},
+    ]},
+  ]},
+];
+
+// ── STATE ──
+var errors=JSON.parse(localStorage.getItem("cfa_errors")||"[]");
+var done=JSON.parse(localStorage.getItem("cfa_done")||"{}");
+var frDone=JSON.parse(localStorage.getItem("fr_done_"+today())||"{}");
+var filterTopic="All";
+var reviewMode=false;
+var editId=null;
+var currentApp="cfa";
+var currentTab=0;
+
+// ── TIMER STATE ──
+var timerOn=false;
+var timerSaved=parseInt(localStorage.getItem("tmr_"+today())||"0");
+var timerSec=0;
+var timerInterval=null;
+var timerStartTs=parseInt(localStorage.getItem("tmr_start_"+today())||"0");
+
+function today(){return new Date().toISOString().slice(0,10);}
+
+// ── INIT ──
+function init(){
+  // Countdown
+  var exam=new Date("2026-05-01");
+  var now=new Date();
+  var diff=Math.max(0,Math.ceil((exam-now)/86400000));
+  document.getElementById("days-left").textContent=diff;
+
+  // Score bars
+  var sg=document.getElementById("score-grid");
+  SCORES.forEach(function(s){
+    sg.innerHTML+='<div class="score-item"><div class="score-header"><span class="score-topic">'+s.t+'</span><span class="score-pct" style="color:'+s.c+'">'+s.p+'%</span></div><div class="score-bar-bg"><div class="score-bar-fill" style="width:'+s.p+'%;background:'+s.c+';"></div></div></div>';
+  });
+
+  // Topic selects and filters
+  var sel=document.getElementById("f-topic");
+  var fb=document.getElementById("filter-buttons");
+  fb.innerHTML='<button class="filter-btn active" onclick="setFilter(\'All\',this)">All</button>';
+  TOPICS.forEach(function(t){
+    sel.innerHTML+='<option value="'+t+'">'+t+'</option>';
+    var cnt=errors.filter(function(e){return e.topic===t;}).length;
+    fb.innerHTML+='<button class="filter-btn" onclick="setFilter(\''+t+'\',this)">'+t+' ('+cnt+')</button>';
+  });
+
+  // Today index
+  var startDate=new Date("2026-03-02");
+  var nowDate=new Date();
+  nowDate.setHours(0,0,0,0);
+  startDate.setHours(0,0,0,0);
+  var todayIdx=Math.floor((nowDate-startDate)/86400000);
+
+  // Phase panels
+  for(var pi=0;pi<3;pi++){
+    var p=PHASES[pi];
+    var offset=pi===0?0:pi===1?28:48;
+    var html='<div class="phase-header"><div class="ph-name">'+p.name+'</div><div class="ph-desc">'+p.desc+'</div></div>';
+    p.weeks.forEach(function(wk,wi){
+      html+='<div class="week-block"><div class="week-label">'+wk.lbl+'</div><div class="day-grid">';
+      wk.days.forEach(function(day,di){
+        var idx=offset+wi*7+di;
+        var isDone=!!done[idx];
+        var isToday=(idx===todayIdx);
+        var cardClass="day-card"+(isDone?" done":"")+(isToday?" today-card":"")+(day.tag==="REST"?" rest":day.tag==="MOCK"?" mock":"");
+        html+='<div class="'+cardClass+'" onclick="toggleDay('+idx+',this)">';
+        html+='<div class="day-card-top"><span class="day-tag">'+day.tag+'</span>';
+        if(isToday) html+='<span class="today-badge">📅 TODAY</span>';
+        html+='<div class="day-check">'+(isDone?"✓":"")+'</div></div>';
+        html+='<div class="day-title">'+day.t+'</div>';
+        html+='<div class="day-desc">'+day.d+'</div>';
+        html+='</div>';
+      });
+      html+='</div></div>';
+    });
+    document.getElementById("panel-"+(pi+1)).innerHTML=html;
+  }
+
+  // French tasks
+  renderFrTasks();
+
+  // Error log
+  renderErrors();
+
+  // Timer recovery
+  if(timerStartTs>0){
+    timerSec=Math.floor((Date.now()-timerStartTs)/1000);
+    timerOn=true;
+    document.getElementById("btn-start").style.display="none";
+    document.getElementById("btn-pause").style.display="inline-block";
+    document.getElementById("timer-display").classList.add("running");
+    timerInterval=setInterval(tickTimer,1000);
+  }
+  updateTimerDisplay();
+}
+
+// ── TIMER ──
+function tickTimer(){
+  if(timerStartTs>0){
+    timerSec=Math.floor((Date.now()-timerStartTs)/1000);
+  }
+  updateTimerDisplay();
+}
+function updateTimerDisplay(){
+  var total=timerSaved+timerSec;
+  var h=Math.floor(total/3600);
+  var m=Math.floor((total%3600)/60);
+  var s=total%60;
+  document.getElementById("timer-display").textContent=
+    String(h).padStart(2,"0")+":"+String(m).padStart(2,"0")+":"+String(s).padStart(2,"0");
+  document.getElementById("total-min").textContent=Math.floor(total/60);
+}
+function startTimer(){
+  if(timerOn)return;
+  timerStartTs=Date.now();
+  localStorage.setItem("tmr_start_"+today(),timerStartTs);
+  timerOn=true;
+  document.getElementById("btn-start").style.display="none";
+  document.getElementById("btn-pause").style.display="inline-block";
+  document.getElementById("timer-display").classList.add("running");
+  timerInterval=setInterval(tickTimer,1000);
+}
+function pauseTimer(){
+  clearInterval(timerInterval);
+  var elapsed=Math.floor((Date.now()-timerStartTs)/1000);
+  timerSaved+=elapsed;
+  timerSec=0;
+  timerStartTs=0;
+  timerOn=false;
+  localStorage.setItem("tmr_"+today(),timerSaved);
+  localStorage.removeItem("tmr_start_"+today());
+  document.getElementById("btn-start").textContent="▶ 继续";
+  document.getElementById("btn-start").style.display="inline-block";
+  document.getElementById("btn-pause").style.display="none";
+  document.getElementById("timer-display").classList.remove("running");
+  updateTimerDisplay();
+}
+function resetTimer(){
+  clearInterval(timerInterval);
+  timerSaved=0;timerSec=0;timerStartTs=0;timerOn=false;
+  localStorage.setItem("tmr_"+today(),"0");
+  localStorage.removeItem("tmr_start_"+today());
+  document.getElementById("btn-start").textContent="▶ 开始";
+  document.getElementById("btn-start").style.display="inline-block";
+  document.getElementById("btn-pause").style.display="none";
+  document.getElementById("timer-display").classList.remove("running");
+  updateTimerDisplay();
+}
+
+// ── APP SWITCH ──
+function switchApp(app){
+  currentApp=app;
+  document.getElementById("cfa-section").style.display=app==="cfa"?"block":"none";
+  document.getElementById("fr-panel").style.display=app==="fr"?"block":"none";
+  document.getElementById("btn-app-cfa").className=app==="cfa"?"active":"";
+  document.getElementById("btn-app-fr").className=app==="fr"?"active":"";
+}
+
+// ── TABS ──
+function switchTab(i){
+  currentTab=i;
+  document.querySelectorAll(".tab").forEach(function(t,idx){t.className="tab"+(idx===i?" active":"");});
+  document.querySelectorAll(".panel").forEach(function(p,idx){p.className="panel"+(idx===i?" active":"");});
+}
+
+// ── DAY TOGGLE ──
+function toggleDay(idx,el){
+  done[idx]=!done[idx];
+  localStorage.setItem("cfa_done",JSON.stringify(done));
+  var isDone=done[idx];
+  el.className="day-card"+(isDone?" done":"")+(el.className.indexOf("rest")>-1?" rest":el.className.indexOf("mock")>-1?" mock":"");
+  el.querySelector(".day-check").textContent=isDone?"✓":"";
+  el.querySelector(".day-title").style.textDecoration=isDone?"line-through":"none";
+  el.querySelector(".day-title").style.color=isDone?"#6b7280":"#1a1a2e";
+  el.style.background=isDone?"rgba(34,139,34,.05)":"#fff";
+  el.style.borderColor=isDone?"#4bc87a":"#e0dbd0";
+}
+
+// ── FRENCH ──
+function renderFrTasks(){
+  var cnt=Object.values(frDone).filter(Boolean).length;
+  document.getElementById("fr-count").textContent=cnt+" / 3";
+  document.getElementById("fr-bar").style.width=(cnt/3*100)+"%";
+  var html="";
+  FR_TASKS.forEach(function(t){
+    var d=!!frDone[t.id];
+    html+='<div class="fr-task'+(d?" done":"")+'" onclick="toggleFr(\''+t.id+'\',this)">';
+    html+='<div class="fr-check">'+(d?"✓":"")+'</div>';
+    html+='<div style="flex:1"><div class="fr-time">'+t.time+'</div>';
+    html+='<div class="fr-ttitle">'+t.title+'</div>';
+    html+='<div class="fr-tdesc">'+t.desc+'</div>';
+    html+='<span class="fr-tag">'+t.tag+'</span></div></div>';
+  });
+  document.getElementById("fr-tasks").innerHTML=html;
+}
+function toggleFr(id,el){
+  frDone[id]=!frDone[id];
+  localStorage.setItem("fr_done_"+today(),JSON.stringify(frDone));
+  renderFrTasks();
+}
+
+// ── ERROR LOG ──
+function setFilter(topic,btn){
+  filterTopic=topic;
+  document.querySelectorAll(".filter-btn").forEach(function(b){b.className="filter-btn";});
+  btn.className="filter-btn active";
+  renderErrors();
+}
+function toggleReview(){
+  reviewMode=!reviewMode;
+  var btn=document.getElementById("review-btn");
+  btn.textContent=reviewMode?"✓ Review ON":"Review Mode";
+  btn.className="action-btn"+(reviewMode?" green":"");
+  renderErrors();
+}
+function toggleForm(){
+  var f=document.getElementById("error-form");
+  f.style.display=f.style.display==="block"?"none":"block";
+  if(f.style.display==="none"){closeForm();}
+}
+function closeForm(){
+  document.getElementById("error-form").style.display="none";
+  document.getElementById("f-topic").value="";
+  document.getElementById("f-keywords").value="";
+  document.getElementById("f-question").value="";
+  document.getElementById("f-hint").value="";
+  document.getElementById("form-title").textContent="NEW ERROR";
+  document.getElementById("save-btn").textContent="SAVE";
+  editId=null;
+}
+function saveError(){
+  var topic=document.getElementById("f-topic").value;
+  var question=document.getElementById("f-question").value.trim();
+  if(!topic||!question){alert("Topic and Question are required.");return;}
+  var entry={
+    id:editId||Date.now(),
+    topic:topic,
+    keywords:document.getElementById("f-keywords").value.trim(),
+    question:question,
+    hint:document.getElementById("f-hint").value.trim()
+  };
+  if(editId){
+    errors=errors.map(function(e){return e.id===editId?entry:e;});
+  } else {
+    errors.unshift(entry);
+  }
+  localStorage.setItem("cfa_errors",JSON.stringify(errors));
+  closeForm();
+  updateFilterCounts();
+  renderErrors();
+}
+function editError(id){
+  var e=errors.find(function(x){return x.id===id;});
+  if(!e)return;
+  editId=id;
+  document.getElementById("f-topic").value=e.topic||"";
+  document.getElementById("f-keywords").value=e.keywords||"";
+  document.getElementById("f-question").value=e.question||"";
+  document.getElementById("f-hint").value=e.hint||"";
+  document.getElementById("form-title").textContent="EDIT ERROR";
+  document.getElementById("save-btn").textContent="UPDATE";
+  document.getElementById("error-form").style.display="block";
+}
+function deleteError(id){
+  if(!confirm("Delete this error?"))return;
+  errors=errors.filter(function(e){return e.id!==id;});
+  localStorage.setItem("cfa_errors",JSON.stringify(errors));
+  updateFilterCounts();
+  renderErrors();
+}
+function toggleReveal(id){
+  var hint=document.getElementById("hint-"+id);
+  var btn=document.getElementById("revbtn-"+id);
+  if(hint.style.display==="none"){
+    hint.style.display="block";
+    btn.textContent="▲ Hide Hint";
+    btn.className="reveal-btn shown";
+  } else {
+    hint.style.display="none";
+    btn.textContent="▼ Show Hint";
+    btn.className="reveal-btn";
+  }
+}
+function updateFilterCounts(){
+  var btns=document.querySelectorAll(".filter-btn");
+  btns.forEach(function(btn,i){
+    if(i===0)return; // "All" button
+    var topic=TOPICS[i-1];
+    var cnt=errors.filter(function(e){return e.topic===topic;}).length;
+    btn.textContent=topic+" ("+cnt+")";
+  });
+}
+function renderErrors(){
+  var list=document.getElementById("error-list");
+  var filtered=filterTopic==="All"?errors:errors.filter(function(e){return e.topic===filterTopic;});
+  document.getElementById("empty-state").style.display=errors.length===0?"block":"none";
+  if(filtered.length===0&&errors.length>0){
+    list.innerHTML='<div style="text-align:center;padding:30px;color:#6b7280;font-family:\'DM Mono\',monospace;font-size:14px;">No errors in '+filterTopic+' yet.</div>';
+    return;
+  }
+  var html="";
+  filtered.forEach(function(e){
+    html+='<div class="error-card">';
+    html+='<div class="error-card-header"><div class="error-badges">';
+    if(e.topic)html+='<span class="badge-topic">'+e.topic+'</span>';
+    if(e.keywords)html+='<span class="badge-kw">'+e.keywords+'</span>';
+    html+='</div><div class="card-actions"><button onclick="editError('+e.id+')">edit</button><button onclick="deleteError('+e.id+')" style="font-size:18px;">×</button></div></div>';
+    html+='<div class="error-question"><div class="qlabel">QUESTION</div>'+escHtml(e.question)+'</div>';
+    if(e.hint){
+      html+='<div class="error-hint">';
+      if(reviewMode){
+        html+='<button class="reveal-btn" id="revbtn-'+e.id+'" onclick="toggleReveal('+e.id+')">▼ Show Hint</button>';
+        html+='<div id="hint-'+e.id+'" style="display:none;" class="hint-box"><strong>✓ </strong>'+escHtml(e.hint)+'</div>';
+      } else {
+        html+='<div class="hint-box"><strong>✓ </strong>'+escHtml(e.hint)+'</div>';
+      }
+      html+='</div>';
+    }
+    html+='</div>';
+  });
+  list.innerHTML=html;
+}
+function escHtml(s){
+  return (s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+}
+
+// ── START ──
+init();
+</script>
+</body>
+</html>
